@@ -52,6 +52,11 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',  # Allow requests from the React frontend
+    'https://your-frontend-domain.com',  # Production frontend domain
+]
+
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
