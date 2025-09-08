@@ -66,3 +66,7 @@ npm run dev
 
 --
 docker-compose up --build
+
+# if you have already the docker container
+# keep in your mind for most of frontend modification you need to restart frontend server
+docker-compose up -d 
