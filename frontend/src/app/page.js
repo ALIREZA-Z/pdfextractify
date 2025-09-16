@@ -21,6 +21,16 @@ export default function HomePage() {
         method: "POST",
         body: formData,
       });
+      
+      if (res.status === 415) {
+        const errData = await res.json();
+        throw new Error(errData.error || "File type must be PDF.");
+      }
+      
+      if (res.status === 413) {
+        const errData = await res.json();
+        throw new Error(errData.error || "File too large");
+      }
 
       if (!res.ok) throw new Error("Upload failed");
 
