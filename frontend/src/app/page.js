@@ -31,12 +31,13 @@ export default function HomePage() {
       if (!res.ok) throw new Error("Upload failed");
 
       // Now fetch extracted text using filename
-      //const textRes = await fetch(`${API_URL}/api/pdf2text/?filename=${encodeURIComponent(file.name)}`);
-      //const data = await textRes.json();
+      const textRes = await fetch(`${API_URL}/api/pdf2text/?filename=${encodeURIComponent(file.name)}`);
+      const data = await textRes.json();
 
-      //if (!textRes.ok) throw new Error(data.error || "Text extraction failed");
+      if (!textRes.ok) throw new Error(data.error || "Text extraction failed");
 
-      //router.push(`/view?text=${encodeURIComponent(data.text)}`);
+      router.push(`/view?filename=${encodeURIComponent(file.name)}`);
+
     } catch (err) {
       setMessage(`Error: ${err.message}`);
     } finally {
