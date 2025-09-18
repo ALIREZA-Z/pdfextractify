@@ -1,3 +1,6 @@
+import os
+from django.conf import settings
+from django.utils.text import get_valid_filename
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
@@ -30,5 +33,14 @@ class FileUploadView(APIView):
                 status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
             )
 
-        # Process or save the file here
-        return Response({"filename": file.name}, status=status.HTTP_201_CREATED)
+        # ✅ Save the file to media/uploads/
+        safe_name = get_valid_filename(file.name)
+        upload_dir = os.path.join(settings.MEDIA_ROOT, "uploads")
+        os.makedirs(upload_dir, exist_ok=True)
+        file_path = os.path.join(upload_dir, safe_name)
+
+        with open(file_path, "wb+") as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+
+        return Response({"filename": safe_name}, status=status.HTTP_201_CREATED)
