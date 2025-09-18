@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { API_URL } from "@/lib/config";
 
 export default function HomePage() {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleUpload = async () => {
     if (!file) {
@@ -13,6 +16,7 @@ export default function HomePage() {
       return;
     }
 
+    setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
 
@@ -21,23 +25,22 @@ export default function HomePage() {
         method: "POST",
         body: formData,
       });
-      
-      if (res.status === 415) {
-        const errData = await res.json();
-        throw new Error(errData.error || "File type must be PDF.");
-      }
-      
-      if (res.status === 413) {
-        const errData = await res.json();
-        throw new Error(errData.error || "File too large");
-      }
 
+      if (res.status === 415) throw new Error("File type must be PDF.");
+      if (res.status === 413) throw new Error("File too large");
       if (!res.ok) throw new Error("Upload failed");
 
-      const data = await res.json();
-      setMessage(`Uploaded successfully: ${data.filename || "file"}`);
+      // Now fetch extracted text using filename
+      //const textRes = await fetch(`${API_URL}/api/pdf2text/?filename=${encodeURIComponent(file.name)}`);
+      //const data = await textRes.json();
+
+      //if (!textRes.ok) throw new Error(data.error || "Text extraction failed");
+
+      //router.push(`/view?text=${encodeURIComponent(data.text)}`);
     } catch (err) {
       setMessage(`Error: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,20 +66,24 @@ export default function HomePage() {
             {file ? file.name : "Choose File"}
             <input
               type="file"
+              accept="application/pdf"
               className="hidden"
-              onChange={(e) => setFile(e.target.files[0])}
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
           </label>
 
           {/* Upload Button */}
           <button
             onClick={handleUpload}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+            disabled={loading}
+            className={`w-full py-2 px-4 rounded-lg font-medium ${
+              loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
           >
-            Upload
+            {loading ? "Uploading..." : "Upload"}
           </button>
 
-          {message && <p className="mt-4 text-sm">{message}</p>}
+          {message && <p className="mt-4 text-sm text-red-600">{message}</p>}
         </div>
       </main>
     </div>
